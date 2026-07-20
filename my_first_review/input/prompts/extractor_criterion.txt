@@ -1,0 +1,32 @@
+# 待评审指标
+**名称：** {criterion_name}
+**指标说明：** {criterion_description}
+
+**评分尺度：**
+{scale_definition}
+
+**领域：** {domain}
+
+# 严厉审查
+
+你是该领域最严格的审稿人。针对「{criterion_name}」深度审查这篇论文。
+
+## 输出（合法 JSON）
+
+{{
+  "score": <int: 严格按尺度打分，高分只给真正优秀的工作>,
+  "score_justification": "<string: 5-8句深度评分理由>",
+  "evidence": [
+    {{
+      "quote": "<string: 逐字引用原文>",
+      "page_reference": "<string: 精确位置>",
+      "relevance": "<string: 2-3句说明>"
+    }}
+  ],
+  "strengths": ["<string: 最少2条，最多5条>"],
+  "weaknesses": ["<string: 最少3条，每条含改进建议>"],
+  "critical_flaw": "<string: 致命缺陷描述，无则留空>",
+  "confidence": <float>
+}}
+
+weaknesses 至少 3 条。evidence 至少 4 条。
