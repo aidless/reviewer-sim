@@ -1,0 +1,321 @@
+import litellm
+from litellm import completion, completion_cost
+from typing import Dict, Any, Optional, List
+import sys
+import os
+import requests  # <-- NEW IMPORT
+import json      # <-- NEW IMPORT
+
+# --- THIS WILL PRINT ONCE WHEN THE SCRIPT LOADS ---
+#print("\n" + "="*60)
+#print("--- LOADING core/llm_wrapper.py (V8 - SURGICAL BYPASS FIX) ---")
+#print("="*60 + "\n")
+sys.stdout.flush()
+# --- END DEBUG BANNER ---
+
+# Set LiteLLM to be verbose about errors
+litellm.set_verbose = False
+
+# Disable SSL verification globally
+litellm.verify_ssl = False
+requests.packages.urllib3.disable_warnings() # Disable warnings for verify=False
+
+# This is CRITICAL for all other calls
+litellm.drop_params = True
+
+# Register custom models from config/model_costs.yaml (pricing + token limits)
+def _load_and_register_custom_models():
+    """Load model_costs.yaml and register entries with litellm."""
+    import yaml
+    config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config", "model_costs.yaml")
+    if not os.path.exists(config_path):
+        return
+    try:
+        with open(config_path, encoding='utf-8') as f:
+            data = yaml.safe_load(f) or {}
+        models = data.get("models", {})
+        extra = {}
+        for model_name, info in models.items():
+            input_per_m = float(info.get("input_cost_per_million", 0))
+            output_per_m = float(info.get("output_cost_per_million", 0))
+            extra[model_name] = {
+                "max_tokens": int(info.get("max_output_tokens", 16384)),
+                "max_input_tokens": int(info.get("max_input_tokens", 128000)),
+                "max_output_tokens": int(info.get("max_output_tokens", 16384)),
+                "input_cost_per_token": input_per_m / 1_000_000,
+                "output_cost_per_token": output_per_m / 1_000_000,
+                "litellm_provider": info.get("litellm_provider", "openai"),
+            }
+        if extra:
+            litellm.register_model(extra)
+            print(f"[ModelCosts] Registered {len(extra)} custom model(s) from model_costs.yaml")
+    except Exception as e:
+        print(f"[ModelCosts] Warning: could not load model_costs.yaml: {e}")
+
+_load_and_register_custom_models()
+
+def resolve_max_tokens(provider: str, model: str, role: Optional[str] = None) -> int:
+    """
+    3-layer token resolution:
+    1. Per-role env override (MAX_TOKENS_EXTRACTION, MAX_TOKENS_SYNTHESIS, MAX_TOKENS_JUDGE)
+    2. litellm registry auto-detection
+    3. TOKEN_LIMIT_DEFAULT fallback
+    """
+    default_fallback = int(os.environ.get("TOKEN_LIMIT_DEFAULT", 16384))
+
+    model_string = f"{provider.strip()}/{model.strip()}"
+
+    if role:
+        env_key = f"MAX_TOKENS_{role.upper()}"
+        env_val = os.environ.get(env_key)
+        if env_val:
+            print(f"[TokenResolver] {model_string} → {env_val} (from {env_key})")
+            return int(env_val)
+
+    try:
+        litellm_max = litellm.get_max_tokens(model_string)
+        if litellm_max and litellm_max > 0:
+            print(f"[TokenResolver] {model_string} → {litellm_max} (litellm auto-detect)")
+            return litellm_max
+    except Exception:
+        pass
+
+    print(f"[TokenResolver] {model_string} → {default_fallback} (fallback default)")
+    return default_fallback
+
+
+def build_cached_messages(
+    system_prompt: str,
+    paper_content: str,
+    criterion_prompt: str
+) -> List[Dict[str, Any]]:
+    """
+    Build a message array with the paper in the system message for prefix caching.
+
+    The paper content is placed in the system message so it forms a shared
+    prefix across all criterion calls for the same paper. The cache_control
+    annotation enables explicit caching on Anthropic; litellm.drop_params=True
+    ensures it is silently stripped for providers that don't support it.
+    OpenAI/DeepSeek/Gemini cache identical prefixes automatically.
+    """
+    system_with_paper = f"{system_prompt}\n\n# Paper Content\n{paper_content}"
+
+    return [
+        {
+            "role": "system",
+            "content": [
+                {
+                    "type": "text",
+                    "text": system_with_paper,
+                    "cache_control": {"type": "ephemeral"},
+                }
+            ],
+        },
+        {"role": "user", "content": criterion_prompt},
+    ]
+
+
+def _call_custom_ollama_bypass(
+    system_prompt: str,
+    prompt: str,
+    model: str,
+    response_format: Optional[str] = None,
+    messages: Optional[List[Dict[str, Any]]] = None
+) -> Dict[str, Any]:
+    """
+    This is a surgical bypass of litellm to call the custom_openai
+    endpoint directly, using the parameters we know it requires.
+    
+    This function mimics the output format of litellm.
+    """
+    print(f"[LLM_Wrapper_V8_BYPASS] Executing surgical bypass for '{model}'")
+    
+    # 1. Get config from .env (which we set up in Step 1)
+    OLLAMA_CHAT_URL = os.environ.get("CUSTOM_OPENAI_API_BASE")
+    OLLAMA_API_KEY = os.environ.get("CUSTOM_OPENAI_API_KEY")
+
+    if not OLLAMA_CHAT_URL or not OLLAMA_API_KEY:
+        print("[LLM_Wrapper_V8_BYPASS] ERROR: CUSTOM_OPENAI_API_BASE or CUSTOM_OPENAI_API_KEY not set in .env")
+        return {"success": False, "error": "Missing CUSTOM_OPENAI env variables", "content": None, "cost": 0.0}
+
+    # 2. Set up headers
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {OLLAMA_API_KEY}"
+    }
+
+    # 3. Define the *correct* payload with the *correct* parameters
+    if messages is not None:
+        # Flatten content-list format to plain strings for custom endpoints
+        flat_messages = []
+        for msg in messages:
+            content = msg["content"]
+            if isinstance(content, list):
+                content = "\n".join(
+                    block["text"] for block in content if isinstance(block, dict) and "text" in block
+                )
+            flat_messages.append({"role": msg["role"], "content": content})
+    else:
+        flat_messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": prompt}
+        ]
+    payload = {
+        "model": model,
+        "messages": flat_messages,
+        "temperature": 1.0,
+        "max_completion_tokens": resolve_max_tokens("custom_openai", model),
+        "stream": False
+        # 'max_tokens' is (correctly) NOT included
+    }
+
+    # Add JSON mode if requested
+    if response_format == "json":
+        payload["response_format"] = {"type": "json_object"}
+        print(f"[LLM_Wrapper_V8_BYPASS] Enabling JSON mode")
+    
+    print(f"[LLM_Wrapper_V8_BYPASS] Payload keys: {list(payload.keys())}")
+
+    # 4. Make the request
+    try:
+        response = requests.post(
+            OLLAMA_CHAT_URL,
+            headers=headers,
+            json=payload,
+            verify=False,  # Disable SSL verification
+            timeout=int(os.environ.get("LLM_TIMEOUT", 300))
+        )
+        
+        response.raise_for_status() # Raise HTTPError for bad responses (4xx or 5xx)
+        data = response.json()
+        
+        # 5. Parse the response and format it like a litellm response
+        content = data["choices"][0]["message"]["content"]
+        usage = data.get("usage", {"prompt_tokens": 0, "completion_tokens": 0})
+        
+        print("[LLM_Wrapper_V8_BYPASS] Success. Parsed response.")
+        
+        return {
+            "success": True,
+            "content": content.strip(),
+            "usage": usage,
+            "cost": 0.0 # We can't calculate cost for this bypass
+        }
+        
+    except requests.exceptions.HTTPError as http_err:
+        print(f"[LLM_Wrapper_V8_BYPASS] HTTP error: {http_err} - Response: {response.text}")
+        return {"success": False, "error": f"HTTPError: {http_err} - {response.text}", "content": None, "cost": 0.0}
+    except (Exception, KeyError, IndexError) as e:
+        print(f"[LLM_Wrapper_V8_BYPASS] Error parsing response: {e} - Data: {data}")
+        return {"success": False, "error": f"ParseError: {e}", "content": None, "cost": 0.0}
+
+
+def call_llm(
+    prompt: str,
+    system_prompt: str,
+    provider: str,
+    model: str,
+    temperature: float,
+    max_retries: int,
+    response_format: Optional[str] = None,
+    config: Optional[Any] = None,
+    role: Optional[str] = None,
+    messages: Optional[List[Dict[str, Any]]] = None
+) -> Dict[str, Any]:
+    """
+    Unified LLM API call with retry logic, cost calculation,
+    and a surgical bypass for the 'custom_openai/gpt-5' combination.
+    """
+    model_string = f"{provider}/{model}"
+
+    # --- NEW SURGICAL BYPASS V8 ---
+
+   # print(f"\n[LLM_Wrapper_V8_DEBUG] Checking for bypass for provider: '{provider}', model: '{model}'")
+
+    # Check for the *one* failing combination
+    if provider.strip().lower() == "custom_openai" and model.strip().lower().startswith("gpt-5"):
+        # ---
+        # BLOCK 1: THE BYPASS
+        # ---
+        return _call_custom_ollama_bypass(
+            system_prompt=system_prompt,
+            prompt=prompt,
+            model=model.strip(),
+            response_format=response_format,
+            messages=messages
+        )
+    
+    # ---
+    # BLOCK 2: ALL OTHER (WORKING) CALLS
+    # ---
+    #print(f"[LLM_Wrapper_V8_DEBUG] ---> No bypass. Proceeding with standard litellm call.")
+    
+    provider_lower = provider.strip().lower()
+    max_tokens_limit = resolve_max_tokens(provider, model, role)
+
+    params = {
+        "num_retries": max_retries,
+        "timeout": int(os.environ.get("LLM_TIMEOUT", 300)),
+        "temperature": temperature,
+        "max_tokens": max_tokens_limit
+    }
+
+    # 2. Handle the *working* 'openai/gpt-5' variant
+    if provider.strip().lower() == "openai" and model.strip().lower().startswith("gpt-5"):
+        print("[LLM_Wrapper_V8_DEBUG] Applying 'openai/gpt-5' temperature override.")
+        params["temperature"] = 1.0
+
+    # 3. Add JSON mode if requested
+    if response_format == "json":
+        # Different providers have different JSON mode syntax
+        provider_lower = provider.strip().lower()
+
+        if provider_lower in ["openai", "custom_openai"]:
+            # OpenAI and compatible APIs
+            params["response_format"] = {"type": "json_object"}
+            print(f"[LLM] Enabling JSON mode for {provider}/{model}")
+        elif provider_lower == "anthropic":
+            # Anthropic Claude
+            params["response_format"] = {"type": "json_object"}
+            print(f"[LLM] Enabling JSON mode for {provider}/{model}")
+        elif provider_lower == "google":
+            # Google Gemini - different format
+            params["response_format"] = "json_object"
+            print(f"[LLM] Enabling JSON mode for {provider}/{model}")
+        # DeepSeek and others may not support JSON mode explicitly
+        # They rely on prompt engineering instead
+        elif provider_lower == "deepseek":
+            print(f"[LLM] DeepSeek JSON mode via prompt engineering (no native JSON mode)")
+        else:
+            print(f"[LLM] JSON mode requested but {provider} support unknown, using prompt only")
+
+    #print(f"[LLM_Wrapper_V8_DEBUG] Final litellm keys: {list(params.keys())}")
+
+    try:
+        final_messages = messages if messages is not None else [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": prompt}
+        ]
+        response = completion(
+            model=model_string,
+            messages=final_messages,
+            **params
+        )
+        
+        cost = completion_cost(completion_response=response)
+        
+        return {
+            "success": True,
+            "content": response.choices[0].message.content,
+            "usage": response.usage.model_dump(),
+            "cost": float(cost) if cost else 0.0
+        }
+    
+    except Exception as e:
+        print(f"[LLM_ERROR] Failed to call {model_string}: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "content": None,
+            "cost": 0.0
+        }
