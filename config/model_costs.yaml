@@ -1,0 +1,24 @@
+# Custom model pricing overrides
+#
+# Models listed here are registered with litellm at startup.
+# Use this for models litellm doesn't know yet (new releases)
+# or to override litellm's built-in pricing with your actual costs.
+#
+# Pricing is in USD per million tokens.
+# litellm auto-detects pricing for most models 鈥?only add entries
+# for models that show $0.00 cost or have incorrect pricing.
+
+models:
+  deepseek/deepseek-v4-flash:
+    input_cost_per_million: 0.28
+    output_cost_per_million: 0.42
+    max_input_tokens: 1000000
+    max_output_tokens: 384000
+    litellm_provider: deepseek
+
+  deepseek/deepseek-v4-pro:
+    input_cost_per_million: 2.19
+    output_cost_per_million: 8.78
+    max_input_tokens: 1000000
+    max_output_tokens: 384000
+    litellm_provider: deepseek
