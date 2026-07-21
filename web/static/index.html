@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能论文评审系统</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <h1>智能论文评审系统</h1>
+        </div>
+        <div class="header-right">
+            <select id="run-selector" class="select-input">
+                <option value="">选择运行目录...</option>
+            </select>
+            <span id="paper-count" class="paper-count" title="当前论文数">📄 0</span>
+            <button id="upload-btn" class="btn btn-secondary" disabled title="上传 PDF/MD/TXT/DOCX">📤 上传论文</button>
+            <input type="file" id="upload-input" accept=".pdf,.md,.txt,.docx" multiple style="display:none">
+            <select id="mode-selector" class="select-input">
+                <option value="standard">标准评审</option>
+                <option value="literature">文献增强评审</option>
+            </select>
+            <button id="start-btn" class="btn btn-primary" disabled>开始评审</button>
+            <button id="stop-btn" class="btn btn-danger" style="display:none">停止</button>
+            <button id="batch-btn" class="btn btn-secondary" title="依次处理所有目录">批量运行</button>
+            <button id="batch-stop-btn" class="btn btn-danger" style="display:none">停止批量</button>
+        </div>
+    </header>
+
+    <!-- Drag & Drop Overlay -->
+    <div id="drop-overlay" class="drop-overlay">
+        <div class="drop-message">
+            <div class="drop-icon">📥</div>
+            <div class="drop-text">松开以上传论文</div>
+            <div class="drop-hint">支持 PDF、Markdown、TXT、DOCX</div>
+        </div>
+    </div>
+
+    <!-- Upload Progress Toast -->
+    <div id="upload-toast" class="toast" style="display:none">
+        <span id="upload-toast-msg"></span>
+    </div>
+
+    <div class="main-content">
+        <!-- Left: Config Panel -->
+        <aside class="config-panel" id="config-panel">
+            <button class="panel-toggle" id="panel-toggle" title="折叠面板">&lsaquo;</button>
+            <div class="sidebar-tabs">
+                <button class="sidebar-tab active" data-tab="config">配置</button>
+                <button class="sidebar-tab" data-tab="criteria">评审标准</button>
+                <button class="sidebar-tab" data-tab="prompts">提示词</button>
+                <button class="sidebar-tab" data-tab="sources">文献源</button>
+                <button class="sidebar-tab" data-tab="costs">费用</button>
+            </div>
+
+            <!-- Config Tab -->
+            <div id="tab-config" class="tab-panel active">
+                <div id="config-content" class="config-content">
+                    <p class="placeholder-text">选择运行目录以查看配置</p>
+                </div>
+                <div class="editor-actions">
+                    <button id="config-save-btn" class="btn btn-sm btn-primary" style="display:none">保存全部</button>
+                </div>
+            </div>
+
+            <!-- Criteria Tab -->
+            <div id="tab-criteria" class="tab-panel">
+                <div id="criteria-editor-wrap" class="editor-wrap">
+                    <p class="placeholder-text">选择运行目录以编辑评审标准</p>
+                </div>
+                <div class="editor-actions">
+                    <button id="criteria-save-btn" class="btn btn-sm btn-primary" style="display:none">保存</button>
+                    <button id="criteria-reload-btn" class="btn btn-sm btn-secondary" style="display:none">重新加载</button>
+                </div>
+                <div id="criteria-validation" class="validation-msg"></div>
+            </div>
+
+            <!-- Prompts Tab -->
+            <div id="tab-prompts" class="tab-panel">
+                <div class="prompt-selector-wrap">
+                    <label for="prompt-selector" class="editor-label">提示词文件：</label>
+                    <select id="prompt-selector" class="select-input prompt-select">
+                        <option value="">加载中...</option>
+                    </select>
+                </div>
+                <div id="prompts-editor-wrap" class="editor-wrap">
+                    <textarea id="prompts-editor" class="code-editor" placeholder="选择提示词文件..."></textarea>
+                </div>
+                <div id="prompt-vars-hint" class="vars-hint"></div>
+                <div class="editor-actions">
+                    <button id="prompt-save-btn" class="btn btn-sm btn-primary" disabled>保存</button>
+                    <button id="prompt-reload-btn" class="btn btn-sm btn-secondary">重新加载</button>
+                </div>
+                <div id="prompt-validation" class="validation-msg"></div>
+            </div>
+
+            <!-- Sources Tab -->
+            <div id="tab-sources" class="tab-panel">
+                <div id="sources-editor-wrap" class="editor-wrap">
+                    <textarea id="sources-editor" class="code-editor" placeholder="加载文献源配置中..."></textarea>
+                </div>
+                <div class="editor-actions">
+                    <button id="sources-save-btn" class="btn btn-sm btn-primary">保存</button>
+                    <button id="sources-reload-btn" class="btn btn-sm btn-secondary">重新加载</button>
+                </div>
+                <div id="sources-validation" class="validation-msg"></div>
+            </div>
+
+            <!-- Costs Tab -->
+            <div id="tab-costs" class="tab-panel">
+                <div class="costs-hint">
+                    litellm 未收录模型的自定义定价。单位：$/百万 tokens。
+                </div>
+                <div id="costs-editor-wrap" class="editor-wrap">
+                    <textarea id="costs-editor" class="code-editor" placeholder="加载模型费用中..."></textarea>
+                </div>
+                <div class="editor-actions">
+                    <button id="costs-save-btn" class="btn btn-sm btn-primary">保存</button>
+                    <button id="costs-reload-btn" class="btn btn-sm btn-secondary">重新加载</button>
+                    <button id="costs-lookup-btn" class="btn btn-sm btn-secondary">查询模型</button>
+                </div>
+                <div id="costs-validation" class="validation-msg"></div>
+                <div id="costs-lookup-result" class="lookup-result"></div>
+            </div>
+        </aside>
+
+        <!-- Right: Main panels -->
+        <div class="right-panels">
+            <!-- Progress Panel -->
+            <section class="progress-panel">
+                <h2>进度</h2>
+                <div id="progress-bar-container" class="progress-bar-container">
+                    <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
+                </div>
+                <div class="progress-stats">
+                    <span id="progress-text">无活跃任务</span>
+                    <span id="progress-eta"></span>
+                </div>
+                <div class="stage-indicators">
+                    <div class="stage-item" id="stage-ingest">
+                        <span class="stage-dot"></span>
+                        <span>论文解析</span>
+                    </div>
+                    <div class="stage-item" id="stage-extraction">
+                        <span class="stage-dot"></span>
+                        <span>逐项评估</span>
+                    </div>
+                    <div class="stage-item" id="stage-synthesis">
+                        <span class="stage-dot"></span>
+                        <span>综合评审</span>
+                    </div>
+                    <div class="stage-item" id="stage-output">
+                        <span class="stage-dot"></span>
+                        <span>输出结果</span>
+                    </div>
+                </div>
+                <div class="cost-time-tracker">
+                    <div class="tracker-item">
+                        <span class="tracker-label">费用</span>
+                        <span id="cost-display" class="tracker-value">$0.00</span>
+                    </div>
+                    <div class="tracker-item">
+                        <span class="tracker-label">已用时间</span>
+                        <span id="elapsed-display" class="tracker-value">0秒</span>
+                    </div>
+                    <div class="tracker-item">
+                        <span class="tracker-label">当前论文</span>
+                        <span id="current-paper-display" class="tracker-value">-</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Batch Progress -->
+            <section id="batch-panel" class="batch-panel" style="display:none">
+                <h2>批量进度</h2>
+                <div class="progress-bar-container">
+                    <div id="batch-progress-bar" class="progress-bar" style="width: 0%"></div>
+                </div>
+                <div class="batch-status">
+                    <span id="batch-text">0/0 目录</span>
+                    <span id="batch-current"></span>
+                </div>
+                <div id="batch-dirs-list" class="batch-dirs-list"></div>
+            </section>
+
+            <!-- Reports Table -->
+            <section class="results-panel">
+                <div class="results-header">
+                    <h2>评审报告</h2>
+                    <div class="results-header-actions">
+                        <button id="refresh-reports-btn" class="btn btn-sm btn-secondary">刷新</button>
+                        <button id="judge-btn" class="btn btn-sm btn-warning" disabled>对比 &amp; 裁决</button>
+                        <button id="view-verdicts-btn" class="btn btn-sm btn-secondary" style="display:none">查看裁决</button>
+                    </div>
+                </div>
+                <div id="results-table-container">
+                    <table id="results-table" class="results-table">
+                        <thead>
+                            <tr>
+                                <th data-sort="paper">论文</th>
+                                <th data-sort="display_date">日期</th>
+                                <th data-sort="extractor_model">评审模型</th>
+                                <th data-sort="synthesizer_model">综合模型</th>
+                                <th data-sort="overall_score">总分</th>
+                                <th data-sort="recommendation">建议</th>
+                                <th data-sort="total_cost">费用</th>
+                                <th data-sort="confidence">置信度</th>
+                                <th>详情</th>
+                            </tr>
+                        </thead>
+                        <tbody id="results-tbody">
+                        </tbody>
+                    </table>
+                    <p id="no-results" class="placeholder-text">暂无报告</p>
+                </div>
+            </section>
+
+            <!-- Review Viewer Modal -->
+            <div id="review-modal" class="modal" style="display:none">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 id="review-modal-title">评审详情</h3>
+                        <button class="modal-close" id="review-modal-close">&times;</button>
+                    </div>
+                    <div id="review-modal-body" class="review-body"></div>
+                </div>
+            </div>
+
+            <!-- Judge Verdicts Modal -->
+            <div id="judge-modal" class="modal" style="display:none">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>裁判裁决</h3>
+                        <button class="modal-close" id="judge-modal-close">&times;</button>
+                    </div>
+                    <div id="judge-modal-body" class="review-body"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Log Panel -->
+    <section class="log-panel">
+        <h2>事件日志</h2>
+        <div id="log-content" class="log-content"></div>
+    </section>
+
+    <footer class="app-footer">
+        智能论文评审系统 &middot; 联合国大学 C3 中心 &middot; Ng Chong 开发
+    </footer>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
