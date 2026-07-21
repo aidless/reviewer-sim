@@ -1,0 +1,23 @@
+litellm
+pydantic
+python-dotenv
+pyyaml
+pandas
+openpyxl
+python-docx
+tenacity
+requests>=2.31.0
+aiohttp>=3.9.0
+markitdown
+pymupdf4llm
+arxiv
+
+# Web Dashboard
+fastapi>=0.100.0
+uvicorn>=0.20.0
+sse-starlette>=1.0.0
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-mock>=3.11.0
