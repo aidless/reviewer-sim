@@ -15,7 +15,7 @@ arxiv
 # Web Dashboard
 fastapi>=0.100.0
 uvicorn>=0.20.0
-sse-starlette>=1.0.0
+sse-starlette>=3.5.0
 
 # Testing
 pytest>=7.4.0
