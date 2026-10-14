@@ -177,7 +177,7 @@ The web dashboard covers common workflows. Some advanced features require the CL
 | Literature-grounded review | Yes | Yes |
 | Sequential batch processing | Yes | Yes |
 | Parallel batch (`--parallel --max-workers`) | Yes | No |
-| Batch setup & paper distribution | Yes | No — use `setup_batch_runs.py` |
+| Batch setup & paper distribution | Yes | No — call `setup_batch_runs()` (module function, no CLI) |
 | No-cache mode (force re-processing) | Yes | No — delete `progress.json` |
 | Provider override flags (`--provider-*`) | Yes | Partial — edit `.env` in Config tab |
 | Automated conflict comparison | Yes | No — run `compare_reports.py` from CLI |
@@ -239,16 +239,21 @@ Set the `domain` field in `criteria.yaml` to pivot the entire system to a new fi
 
 ## Batch Processing
 
-Distribute large paper collections across multiple run directories:
+Distribute large paper collections across multiple run directories.
+
+There is no `setup_batch_runs.py` CLI. The distribution logic is the function
+`setup_batch_runs()` in `setup_batch_runs_literature.py` (no argparse entry
+point), so call it from your own driver or a REPL:
+
+```python
+from setup_batch_runs_literature import setup_batch_runs
+setup_batch_runs(master_papers_dir="papers_master", base_run_dir="run_dir",
+                 num_runs=10, papers_per_run=50)
+```
+
+Once the run directories exist, the batch driver is a real CLI:
 
 ```bash
-python setup_batch_runs.py \
-  --master-papers-dir papers_master \
-  --base-run-dir run_dir \
-  --num-runs 10 \
-  --papers-per-run 50 \
-  --create-batch-script
-
 # Sequential
 python run_batch.py
 
