@@ -9,7 +9,9 @@ tenacity
 requests>=2.31.0
 aiohttp>=3.9.0
 markitdown
-pymupdf4llm
+# Pinned: 2.0 is an intentional empty shim (the 4llm code moved into pymupdf
+# 2.x), so an unpinned install of 2.0 leaves `import pymupdf4llm` broken.
+pymupdf4llm==1.28.2
 arxiv
 
 # Web Dashboard
