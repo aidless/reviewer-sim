@@ -1,12 +1,11 @@
 # CI for reviewer-sim
 #
-# Scope note, verified against the tree on 2026-10-05: this repository has no test
-# suite. pytest.ini points testpaths at tests/, but that directory does not exist and
-# no test_*.py file is tracked anywhere in the repository. `pytest -q` therefore exits
-# 5 ("no tests ran"), which is not a failure of the code — it is an absence of tests.
-# The 20 modules under core/ and agents/ are real code, so CI checks them the honest
-# way available: they must all compile, and the CLI entry points must import cleanly
-# (import is checked without executing, so no API keys or network are needed).
+# Scope note, verified against the tree on 2026-11-01: a real offline test suite
+# now lives in tests/ (38 tests, no API keys / no network needed). It covers
+# config loading (weights sum to 100, threshold sorting), helpers (sanitize,
+# hashing, novelty adjustment), and the score -> recommendation mapping.
+# The 20 modules under core/ and agents/ are still compiled and imported to
+# catch syntax/import regressions. LLM calls are NOT executed in CI.
 name: CI
 
 on:
@@ -53,14 +52,8 @@ jobs:
               sys.exit("import failures:\n  " + "\n  ".join(bad))
           PY
 
-      - name: Report the absent test suite as a warning
-        run: |
-          if [ ! -d tests ] && ! git ls-files | grep -q '^test.*\.py$'; then
-            echo "::warning::no test suite is tracked in this repository"
-            echo "::warning::(pytest.ini sets testpaths = tests, but tests/ does"
-            echo "::warning::not exist). CI verifies compilation and importability."
-          fi
-          echo "OK (advisory only)"
+      - name: Run the offline test suite
+        run: python -m pytest tests/ -o addopts="" -q
 
   mutation-control:
     # Proves the syntax gate can fail.

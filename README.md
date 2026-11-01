@@ -11,6 +11,45 @@ A domain-agnostic, multi-agent LLM system for structured academic paper review. 
 
 **Blog article:** https://c3.unu.edu/blog/from-months-to-days-ai-assisted-peer-review-with-human-oversight
 
+## What This Proves / Does Not Prove
+
+**This project proves (as an engineering demonstration):**
+
+- A multi-agent LLM pipeline can be configured to ingest a PDF, decompose an
+  evaluation into named criteria, score each criterion on a configurable
+  numeric scale with evidence quotes, and synthesize a weighted overall score
+  plus a recommendation — with the full weight/scale/threshold logic being
+  deterministic and unit-testable (see `tests/`).
+- The score → recommendation mapping is a pure function of configurable
+  thresholds (sorted descending, first match wins), and the weights are
+  validated to sum to 100. This logic is exercised offline by
+  `tests/test_scoring.py` and `tests/test_config_loader.py` (38 tests pass).
+- Cross-model adjudication (`judge_conflicts.py`) and literature grounding are
+  wired in as optional stages.
+
+**This project does NOT prove:**
+
+- That LLM-generated review scores are *valid* or *calibrated* measures of
+  paper quality. The scores are model judgments against prompt-defined
+  criteria, not measurements validated against any ground-truth labels.
+  There is no inter-rater reliability, no human-label correlation, and no
+  calibration study in this repository. A score of 43.2 is a model's opinion
+  with a documented rationale, not an objective quality estimate.
+- That the AI's accept/reject recommendation should be used as the decision.
+  **The final decision is always made by a human.** The system is designed to
+  *surface* disagreements and evidence, not to *replace* reviewers.
+- That literature grounding retrieves a complete or unbiased baseline. The
+  librarian queries Semantic Scholar / Arxiv / World Bank with generated
+  keywords and a rate limit; recall, precision, and domain coverage are not
+  benchmarked here.
+- Any claim about a specific paper being "good" or "bad." The bundled
+  `my_first_review/` outputs (e.g., the 43.2 and 30.4 scores for the
+  resampling-calibration paper) are one run's outputs, not a verdict.
+
+This is a **fail-closed** design: where the pipeline cannot verify (no
+ground-truth calibration, no reliability data), it declines to assert validity
+rather than implying it.
+
 ## How It Works
 
 The system uses a team of AI agents, each with a distinct role:
@@ -306,6 +345,53 @@ Each paper is evaluated per criterion (8 criteria = 8 extraction calls) plus one
 **Prompt caching** significantly reduces extraction costs: the paper content is placed in the system message prefix and cached across all criterion calls for the same paper. The first criterion pays full price; the remaining 7 hit the cache at up to 90% discount (Anthropic) or are auto-cached (OpenAI, DeepSeek). Criteria are extracted in parallel for each paper.
 
 Always test with 5-10 papers first to verify your criteria and estimate costs before committing to a full batch.
+
+## Reproducibility
+
+This repository is a **documentation + offline-testable-logic** deliverable: the
+LLM calls require API keys and network, but the scoring/config logic does not.
+Everything below can be re-run from a clean checkout.
+
+### Tests
+
+```bash
+# From the repo root. No API keys, no network.
+python -m pytest tests/ -o addopts="" -q
+```
+
+This runs 38 offline tests covering:
+
+- `tests/test_config_loader.py` — criteria weights sum to 100 (global
+  `config/criteria.yaml` and the bundled `my_first_review/input/criteria.yaml`),
+  thresholds sort descending, default thresholds sane.
+- `tests/test_helpers.py` — model-name sanitization, weight-table rendering,
+  config hashing, and the novelty score adjustment (bonus/penalty/clamping).
+- `tests/test_scoring.py` — `calculate_recommendation` reproduces the exact
+  score → recommendation mapping for both the machine-learning run (85/65/45/0)
+  and the development-economics default (85/70/50/0), including boundary cases.
+
+### Where the numbers come from
+
+- **Review scores** (e.g., the `43.2` and `30.4` in
+  `my_first_review/outputs/reports/`) were produced by a live run on
+  `2026-06-28` with DeepSeek V4 Pro, saved as CSV under
+  `my_first_review/outputs/reports/consolidated_reviews_*.csv`. To regenerate
+  them you must re-run the LLM pipeline (requires `DEEPSEEK_API_KEY`); the
+  offline test suite does not regenerate these because they are model outputs.
+- **The scoring formula** is deterministic and re-derivable:
+  `final_score = (Σ per-criterion weighted score / Σ weights) × 100`, then the
+  highest threshold `t` with `final_score >= t` sets the recommendation
+  (`agents/agent_synthesizer.py:calculate_recommendation`). The offline tests
+  in `tests/test_scoring.py` re-derive both the 100-point and boundary cases.
+- **Criteria weights** are read from `criteria.yaml`; both bundled configs sum
+  to 100 (asserted in `tests/test_config_loader.py`).
+
+### Honest absence
+
+There is **no benchmark** in this repository measuring review quality against
+ground truth, and **no calibration** of scores. The bundled output CSVs are
+model judgments, not validated measurements. See "What This Proves / Does Not
+Prove" above.
 
 ## License
 

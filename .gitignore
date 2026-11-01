@@ -46,7 +46,11 @@ fetch_arxiv_papers.py
 # Test caches and dirs
 test_literature_enhanced/
 test_literature_run/
+# Track the real test suite (tests/ was historically gitignored; the repo had
+# no tracked tests — see ci.yml. Negate the dir but keep its caches ignored.)
 tests/
+!tests/
+!tests/test_*.py
 
 # Archives
 archive/
