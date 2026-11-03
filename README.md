@@ -7,6 +7,10 @@ A domain-agnostic, multi-agent LLM system for structured academic paper review. 
 **Human oversight is central to the design.** The AI produces structured reviews and scores — the final accept/reject decisions are always made by humans. Multi-model comparison and the AI Judge help reviewers focus where it matters by surfacing the papers where models disagree, rather than requiring manual review of every assessment.
 
 
+**What has actually been run.** `my_first_review/` holds one end-to-end run (2026-06-28): 12 per-paper reviews and 3 consolidated CSVs, all readable in-repo. No claim is made about review quality versus human reviewers.
+
+**Run it in one command.** `pip install -r requirements.txt && python run_with_custom_params.py --run-dir my_review_run` (needs API keys, see below). This repo ships the code and one worked example, not benchmark numbers.
+
 **Full documentation:** https://c3.unu.edu/projects/ai/paperreview/userguide.html
 
 **Blog article:** https://c3.unu.edu/blog/from-months-to-days-ai-assisted-peer-review-with-human-oversight
