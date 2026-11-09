@@ -4,6 +4,8 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
+> 🗂 **仓库族谱**：「论文评审」主线仓是 [review-workflow](https://github.com/aidless/review-workflow)（16 阶段，持续维护）；完整 Web+CLI 版参考已归档的 [agentic-paper-review](https://github.com/aidless/agentic-paper-review)；本仓定位是多角色模拟评审变体。
+
 A domain-agnostic, multi-agent LLM system for structured academic paper review. Ingests PDFs (and other formats), evaluates each paper against custom criteria, and produces scored reviews with optional cross-model adjudication and literature grounding. While designed for academic papers, the fully configurable criteria and prompts make it applicable to any document that needs structured evaluation — grant proposals, project reports, policy briefs, or technical documentation.
 
 **Human oversight is central to the design.** The AI produces structured reviews and scores — the final accept/reject decisions are always made by humans. Multi-model comparison and the AI Judge help reviewers focus where it matters by surfacing the papers where models disagree, rather than requiring manual review of every assessment.
