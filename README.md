@@ -1,5 +1,7 @@
 # Agentic Paper Review System
 
+[![CI](https://github.com/aidless/reviewer-sim/actions/workflows/ci.yml/badge.svg)](https://github.com/aidless/reviewer-sim/actions/workflows/ci.yml)
+
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 A domain-agnostic, multi-agent LLM system for structured academic paper review. Ingests PDFs (and other formats), evaluates each paper against custom criteria, and produces scored reviews with optional cross-model adjudication and literature grounding. While designed for academic papers, the fully configurable criteria and prompts make it applicable to any document that needs structured evaluation — grant proposals, project reports, policy briefs, or technical documentation.
