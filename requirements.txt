@@ -11,7 +11,7 @@ aiohttp>=3.9.0
 markitdown
 # Pinned: 2.0 is an intentional empty shim (the 4llm code moved into pymupdf
 # 2.x), so an unpinned install of 2.0 leaves `import pymupdf4llm` broken.
-pymupdf4llm==1.28.2
+pymupdf4llm==2.1
 arxiv
 
 # Web Dashboard
