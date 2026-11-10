@@ -6,7 +6,7 @@ pandas
 openpyxl
 python-docx
 tenacity
-requests>=2.31.0
+requests>=2.34.2
 aiohttp>=3.9.0
 markitdown
 # Pinned: 2.0 is an intentional empty shim (the 4llm code moved into pymupdf
