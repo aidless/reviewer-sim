@@ -6,6 +6,10 @@
 
 > 🗂 **仓库族谱**：「论文评审」主线仓是 [review-workflow](https://github.com/aidless/review-workflow)（16 阶段，持续维护）；完整 Web+CLI 版参考已归档的 [agentic-paper-review](https://github.com/aidless/agentic-paper-review)；本仓定位是多角色模拟评审变体。
 
+![CLI demo](docs/demo.gif)
+
+![Web Dashboard](docs/dashboard.png)
+
 A domain-agnostic, multi-agent LLM system for structured academic paper review. Ingests PDFs (and other formats), evaluates each paper against custom criteria, and produces scored reviews with optional cross-model adjudication and literature grounding. While designed for academic papers, the fully configurable criteria and prompts make it applicable to any document that needs structured evaluation — grant proposals, project reports, policy briefs, or technical documentation.
 
 **Human oversight is central to the design.** The AI produces structured reviews and scores — the final accept/reject decisions are always made by humans. Multi-model comparison and the AI Judge help reviewers focus where it matters by surfacing the papers where models disagree, rather than requiring manual review of every assessment.
@@ -18,6 +22,32 @@ A domain-agnostic, multi-agent LLM system for structured academic paper review. 
 **Full documentation:** https://c3.unu.edu/projects/ai/paperreview/userguide.html
 
 **Blog article:** https://c3.unu.edu/blog/from-months-to-days-ai-assisted-peer-review-with-human-oversight
+
+## Worked Example (real output, committed in-repo)
+
+`my_first_review/` holds one end-to-end run (DeepSeek `deepseek-v4-pro`, 2026-06-28).
+The consolidated CSV row, extracted with the actual file in-repo:
+
+```
+$ tail -1 my_first_review/outputs/reports/consolidated_reviews_20260628_211226.csv | cut -d, -f1,5,6,7,8
+main_1,30.4,拒稿,0.96,0.22231965599999998
+# (paper_filename, overall_score, recommendation, confidence, total_cost_usd)
+```
+
+Full reviews are plain Markdown, e.g. `my_first_review/outputs/reviews/` — each carries
+per-criterion scores with quotes, a verdict, and a confidence level. The CLI demo GIF at
+the top of this README reproduces the setup step offline (`setup_run.py` needs no API key).
+
+## Limits
+
+- **Reviews are AI opinions, not ground truth.** No claim is made about review quality
+  versus human reviewers; scores and recommendations are inputs to human decisions.
+- **The review pipeline makes real LLM calls and costs real money** — the example above
+  cost $0.22 per paper. Always test with 5-10 papers before a full batch.
+- **The web dashboard has no authentication** — local use only (SSH tunnel for remote).
+- `compare_reports.py` / `judge_conflicts.py` need at least two model runs first.
+- PDF ingestion depends on the bundled parsers; scanned/image-only PDFs fall back to
+  OCR-less extraction and may yield poor text.
 
 ## How It Works
 
@@ -318,3 +348,16 @@ Always test with 5-10 papers first to verify your criteria and estimate costs be
 ## License
 
 [MIT](LICENSE)
+
+## 结构导览
+
+| 路径 | 内容 |
+|------|------|
+| `core/` | 评审引擎核心（ingestion / extraction / synthesis / llm_wrapper） |
+| `web/` | FastAPI dashboard（`web/static/` 前端） |
+| `setup_run.py` / `setup_run_literature.py` | 初始化 run 目录（离线可用） |
+| `run_with_custom_params.py` / `run_review_with_dir_literature.py` | 评审主入口（需 API key） |
+| `compare_reports.py` / `judge_conflicts.py` | 多模型对比与 Judge 仲裁 |
+| `config/` | criteria / prompts / literature_sources / 模型成本模板 |
+| `my_first_review/` | 仓库内真实跑通的完整示例（12 份评审 + 3 份汇总 CSV） |
+| `docs/` | CLI demo GIF + dashboard 截图 |
