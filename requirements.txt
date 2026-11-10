@@ -16,7 +16,7 @@ arxiv
 
 # Web Dashboard
 fastapi>=0.100.0
-uvicorn>=0.20.0
+uvicorn>=0.54.0
 sse-starlette>=1.0.0
 
 # Testing
