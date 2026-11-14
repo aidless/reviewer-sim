@@ -112,7 +112,7 @@ def setup_batch_literature_runs(
 
     if not os.path.exists(master_literature_dir):
         print(f"Warning: Master literature directory does not exist: {master_literature_dir}")
-        print(f"  Literature directory will be created but left empty.")
+        print("  Literature directory will be created but left empty.")
 
     if not os.path.exists(config_dir):
         raise ValueError(f"Config directory does not exist: {config_dir}")
@@ -188,7 +188,7 @@ def setup_batch_literature_runs(
         if literature_sources_src.exists():
             shutil.copy(literature_sources_src, input_dir / "literature_sources.yaml")
         else:
-            print(f"  Creating default literature_sources.yaml...")
+            print("  Creating default literature_sources.yaml...")
             create_default_literature_sources(input_dir / "literature_sources.yaml")
 
         # Copy prompts directory

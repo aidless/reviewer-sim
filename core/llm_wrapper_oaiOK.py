@@ -1,6 +1,6 @@
 import litellm
 from litellm import completion, completion_cost
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 import sys
 
 # --- THIS WILL PRINT ONCE WHEN THE SCRIPT LOADS ---

@@ -4,9 +4,8 @@ import os
 import sys
 import argparse
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict
 import json
-from datetime import datetime
 import logging
 
 # Configure logging to suppress LiteLLM messages
@@ -25,8 +24,7 @@ from utilities.output_generator import save_review_markdown, save_consolidated_c
 from utilities.helpers import setup_logging, get_config_hash
 from core.data_models import Review
 from core.progress import (
-    get_emitter, configure_emitter, SSEBackend,
-    RunStarted, StageStarted, StageCompleted,
+    get_emitter, configure_emitter, RunStarted, StageStarted, StageCompleted,
     PaperCompleted, RunProgress, CostUpdate, RunCompleted
 )
 
@@ -219,7 +217,7 @@ def main():
     print(f"[Config] Temperature: {llm_config['temperature']}",flush=True)
     
     # 4. Load ingestion cache from the run directory
-    print(f"\n[Cache] Loading ingestion cache...", flush=True)
+    print("\n[Cache] Loading ingestion cache...", flush=True)
     ingestion_cache = load_ingestion_cache(dirs["cache_file"])
     
     # 5. Ingest papers
@@ -263,7 +261,7 @@ def main():
     
     if remaining_count == 0:
         print("\n✅ [Progress] All papers have been processed with current configuration!")
-        print(f"💰 [Cost] No new processing needed - all data loaded from cache")
+        print("💰 [Cost] No new processing needed - all data loaded from cache")
     else:
         print(f"\n[Progress] Starting processing of {remaining_count} remaining papers...")
     
@@ -288,7 +286,7 @@ def main():
         paper_start_time = time.time()
         
         # 8. Agent 1: Extract Evidence (Parallel)
-        print(f"   🔍 [Agent 1] Starting evidence extraction...", flush=True)
+        print("   🔍 [Agent 1] Starting evidence extraction...", flush=True)
         emitter.emit(StageStarted(stage_name="extraction", paper_filename=paper.filename))
         extraction_start = time.time()
         extractions = process_paper_extractions(paper, config)
@@ -303,7 +301,7 @@ def main():
                                      result_summary=f"{len(extractions)} extractions"))
 
         # 9. Agent 2: Synthesize Review
-        print(f"   📝 [Agent 2] Starting review synthesis...")
+        print("   📝 [Agent 2] Starting review synthesis...")
         emitter.emit(StageStarted(stage_name="synthesis", paper_filename=paper.filename))
         synthesis_start = time.time()
         review = synthesize_review(paper, extractions, config)
@@ -318,7 +316,7 @@ def main():
                                      result_summary=f"score={review.overall_score:.1f}"))
         
         # 10. Save Individual Output
-        print(f"   💾 [Output] Saving review...", flush=True)
+        print("   💾 [Output] Saving review...", flush=True)
         save_review_markdown(review, paper, config, dirs["reviews_dir"])
         
         # 11. Update progress
@@ -367,12 +365,12 @@ def main():
         # Update overall progress
         overall_progress = completed_count + processed_count
         print_progress_bar(overall_progress, len(papers), 
-                          prefix=f"[Progress] Overall", 
+                          prefix="[Progress] Overall", 
                           suffix=f"({overall_progress}/{len(papers)})")
 
     # 12. Save Consolidated Report
     if final_reviews:
-        print(f"\n📊 [Report] Generating consolidated report...", flush=True)
+        print("\n📊 [Report] Generating consolidated report...", flush=True)
         save_consolidated_csv(final_reviews, dirs["reports_dir"])
         print(f"   ✅ [Report] Saved to {dirs['reports_dir']}", flush=True)
     
@@ -383,13 +381,13 @@ def main():
     print("🎉 Batch Complete!", flush=True)
     print("=" * 80, flush=True)
     print(f"📊 [Summary] Total papers processed: {len(final_reviews)}", flush=True)
-    print(f"💰 [Summary] Cost breakdown:", flush=True)
+    print("💰 [Summary] Cost breakdown:", flush=True)
     print(f"   • New processing cost: ${new_processing_cost:.4f}", flush=True)
     print(f"   • Cached data cost: ${cached_cost:.4f}", flush=True)
     print(f"   • Total batch cost: ${total_batch_cost:.4f}", flush=True)
     
     if new_processing_cost == 0:
-        print(f"   ✅ No API calls made - all data loaded from cache!", flush=True)
+        print("   ✅ No API calls made - all data loaded from cache!", flush=True)
     elif cached_cost > 0:
         print(f"   📈 {completed_count} papers from cache, {processed_count} newly processed", flush=True)
     
@@ -399,7 +397,7 @@ def main():
         avg_cost_per_paper = new_processing_cost / processed_count
         if avg_cost_per_paper > cost_warning_threshold:
             print(f"\n⚠️  [Warning] High average cost per paper: ${avg_cost_per_paper:.4f}", flush=True)
-            print(f"   Consider using cheaper models for extraction to reduce costs", flush=True)
+            print("   Consider using cheaper models for extraction to reduce costs", flush=True)
     
     print(f"⏱️  [Summary] Total processing time: {total_time:.2f} seconds ({total_time/60:.1f} minutes)", flush=True)
     if len(papers) > 0:

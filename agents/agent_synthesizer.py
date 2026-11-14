@@ -1,5 +1,5 @@
 import json
-from typing import List, Dict, Any, Tuple, Optional
+from typing import List, Dict, Tuple, Optional
 from pydantic import ValidationError
 
 from core.data_models import Paper, Extraction, Review, WeightedBreakdown
@@ -127,7 +127,7 @@ def synthesize_review(
         total_cost = total_extraction_cost + response['cost']
         
         if 'criterion_narrative' not in review_data or not isinstance(review_data['criterion_narrative'], dict):
-             print(f"[Agent 2 Warning] 'criterion_narrative' not found or not a dict. Setting to empty.")
+             print("[Agent 2 Warning] 'criterion_narrative' not found or not a dict. Setting to empty.")
              review_data['criterion_narrative'] = {}
 
         extractor_model_name = extractions[0].model_used if extractions else "unknown_extractor"

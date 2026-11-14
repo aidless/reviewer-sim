@@ -62,7 +62,7 @@ def main():
         print(f"⚠️  Warning: .env file not found at {env_file}, creating new one")
     
     # DEBUG: Print original values
-    print(f"\n🔍 DEBUG: Original values before update:")
+    print("\n🔍 DEBUG: Original values before update:")
     print(f"   PROVIDER_EXTRACTION: {env_vars.get('PROVIDER_EXTRACTION', 'not set')}")
     print(f"   EXTRACTOR_MODEL: {env_vars.get('EXTRACTOR_MODEL', 'not set')}")
     print(f"   PROVIDER_SYNTHESIS: {env_vars.get('PROVIDER_SYNTHESIS', 'not set')}")
@@ -127,7 +127,7 @@ def main():
         updated_params.append(f"JUDGE_TEMPERATURE: {old_value} → {args.judge_temperature}")
     
     # DEBUG: Print updated values
-    print(f"\n🔍 DEBUG: Values after update:")
+    print("\n🔍 DEBUG: Values after update:")
     print(f"   PROVIDER_EXTRACTION: {env_vars.get('PROVIDER_EXTRACTION', 'not set')}")
     print(f"   EXTRACTOR_MODEL: {env_vars.get('EXTRACTOR_MODEL', 'not set')}")
     print(f"   PROVIDER_SYNTHESIS: {env_vars.get('PROVIDER_SYNTHESIS', 'not set')}")
@@ -164,7 +164,7 @@ def main():
                 f.write(f"{key}={value}\n")
     
     # Verify the .env file was written correctly
-    print(f"\n🔍 Verifying .env file content:")
+    print("\n🔍 Verifying .env file content:")
     with open(env_file, "r") as f:
         content = f.read()
         for line in content.split('\n'):
@@ -273,7 +273,7 @@ def main():
         
         print("-" * 80)
         if return_code == 0:
-            print(f"✅ Process completed successfully!")
+            print("✅ Process completed successfully!")
             print(f"⏰ Finished at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
             print(f"⏱️  Total duration: {duration:.1f} seconds ({duration/60:.1f} minutes)")
         else:

@@ -4,7 +4,7 @@ import shutil
 import argparse
 import random
 from pathlib import Path
-from typing import List, Dict, Tuple
+from typing import List, Dict
 import math
 from core.config_loader import MODEL_DEFAULTS
 

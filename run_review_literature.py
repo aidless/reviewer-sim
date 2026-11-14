@@ -18,22 +18,21 @@ import os
 import sys
 import argparse
 from pathlib import Path
-from datetime import datetime
 from typing import List, Optional
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from core.data_models import Paper, GroundedReview, BaselineReference, LiteratureContext
+from core.data_models import Paper, GroundedReview
 from core.config_loader import Config
 from core.paper_ingestor import (
     load_ingestion_cache,
     save_ingestion_cache,
     ingest_directory
 )
-from agents.agent_librarian import create_baseline_reference, create_baseline_reference_batch
+from agents.agent_librarian import create_baseline_reference
 from agents.agent_reader import process_paper_extractions
-from agents.agent_fact_checker import run_fact_checks, summarize_fact_checks
+from agents.agent_fact_checker import run_fact_checks
 from agents.agent_critic import synthesize_grounded_review
 from agents.agent_synthesizer import synthesize_review
 from utilities.output_generator import save_review_markdown, save_consolidated_csv
@@ -172,7 +171,7 @@ def run_literature_grounded_review(
 
                 # Print summary
                 avg_novelty = sum(e.novelty_ranking for e in extractions) / len(extractions)
-                print(f"\n[Summary]")
+                print("\n[Summary]")
                 print(f"  Overall Score: {review.overall_score:.1f}")
                 print(f"  Recommendation: {review.recommendation}")
                 print(f"  Avg Novelty: {avg_novelty:.2f}/5")
@@ -181,7 +180,7 @@ def run_literature_grounded_review(
                     print(f"  Novelty Adjustment: {adjustment:+.1f}")
 
             else:
-                print(f"[Critic] ✗ Failed to synthesize review")
+                print("[Critic] ✗ Failed to synthesize review")
 
         except Exception as e:
             print(f"\n[Error] Failed to review {paper.filename}: {e}")
@@ -299,7 +298,7 @@ def main():
         try:
             literature_config_path = config_path / "literature_sources.yaml"
             literature_config = load_yaml_config(str(literature_config_path))
-            print(f"[Config] Literature config loaded")
+            print("[Config] Literature config loaded")
         except Exception as e:
             print(f"[Warning] Failed to load literature config: {e}")
             use_literature = False
@@ -391,7 +390,7 @@ def main():
 
     # Calculate statistics
     scores = [r.overall_score for r in reviews]
-    print(f"\nScore Statistics:")
+    print("\nScore Statistics:")
     print(f"  Average: {sum(scores)/len(scores):.1f}")
     print(f"  Range: {min(scores):.1f} - {max(scores):.1f}")
 
@@ -399,7 +398,7 @@ def main():
     for r in reviews:
         recommendations[r.recommendation] = recommendations.get(r.recommendation, 0) + 1
 
-    print(f"\nRecommendations:")
+    print("\nRecommendations:")
     for rec, count in recommendations.items():
         print(f"  {rec}: {count}")
 

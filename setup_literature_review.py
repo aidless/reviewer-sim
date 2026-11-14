@@ -37,10 +37,10 @@ def setup_literature_run_directory(run_dir: str, config_dir: str = "config"):
         literature_sources_src = Path(config_dir) / "literature_sources.yaml"
         if literature_sources_src.exists():
             shutil.copy(literature_sources_src, input_dir / "literature_sources.yaml")
-            print(f"  ✓ Copied literature_sources.yaml")
+            print("  ✓ Copied literature_sources.yaml")
         else:
             print(f"  ⚠ Warning: literature_sources.yaml not found in {config_dir}")
-            print(f"    Creating default literature_sources.yaml template...")
+            print("    Creating default literature_sources.yaml template...")
             create_default_literature_sources(input_dir / "literature_sources.yaml")
 
         # Copy prompts directory (if literature-specific prompts exist)
@@ -94,21 +94,21 @@ MAX_PARALLEL_EXTRACTIONS=5
 # Literature Source Configuration
 LITERATURE_SOURCES_PATH={input_dir / 'literature_sources.yaml'}
 """)
-            print(f"  ✓ Created .env file with literature pipeline configuration")
+            print("  ✓ Created .env file with literature pipeline configuration")
     else:
         print(f"⚠ Warning: Config directory {config_dir} not found.")
-        print(f"  You'll need to create literature_sources.yaml manually.")
+        print("  You'll need to create literature_sources.yaml manually.")
 
     print(f"\n{'='*60}")
-    print(f"✅ Literature Review Directory Set Up")
+    print("✅ Literature Review Directory Set Up")
     print(f"{'='*60}")
     print(f"📁 Run Directory: {run_path}")
     print(f"\n📄 Place papers to review in: {papers_dir}")
     print(f"📚 Place baseline literature in: {literature_dir}")
     print(f"⚙️  Modify LLM parameters in: {env_file}")
     print(f"📖 Configure literature sources in: {input_dir / 'literature_sources.yaml'}")
-    print(f"\n🔑 API keys are loaded from the global .env file at the project root")
-    print(f"\n🚀 To run the literature review:")
+    print("\n🔑 API keys are loaded from the global .env file at the project root")
+    print("\n🚀 To run the literature review:")
     print(f"   python run_review_literature.py --run-dir {run_dir}")
 
 def create_default_literature_sources(output_path: Path):
@@ -191,7 +191,7 @@ novelty_dimensions:
 
     with open(output_path, "w") as f:
         f.write(default_content)
-    print(f"  ✓ Created default literature_sources.yaml template")
+    print("  ✓ Created default literature_sources.yaml template")
 
 
 def main():

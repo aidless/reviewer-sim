@@ -8,7 +8,6 @@ in the target paper's sub-topic and extracting their key findings.
 import json
 import os
 from typing import List, Dict, Any, Optional
-from pydantic import ValidationError
 
 from core.data_models import Paper, BaselineReference, RelatedPaperMetadata
 from core.config_loader import Config
@@ -494,7 +493,7 @@ def _generate_baseline_summary(
         papers_summary += f"\n{i}. {paper.title} ({paper.year or 'n.d.'})\n"
         papers_summary += f"   Citations: {paper.citation_count or 0}\n"
         if paper.key_findings:
-            papers_summary += f"   Key Findings:\n"
+            papers_summary += "   Key Findings:\n"
             for finding in paper.key_findings:
                 papers_summary += f"   - {finding}\n"
 

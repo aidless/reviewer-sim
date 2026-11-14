@@ -1,10 +1,9 @@
 import litellm
 from litellm import completion, completion_cost
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 import sys
 import os
 import requests  
-import json      
 
 # Suppress LiteLLM logging
 import logging

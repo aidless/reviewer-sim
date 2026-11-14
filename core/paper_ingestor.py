@@ -1,14 +1,12 @@
 # core/paper_ingestor.py (enhanced version)
 import os
 import json
-from markitdown import MarkItDown
 from core.data_models import Paper, PaperMetadata
 from litellm import token_counter
 import logging
 from typing import List, Optional, Dict, Tuple
 import hashlib
 import time
-from datetime import datetime
 
 import pymupdf4llm
 
@@ -274,8 +272,8 @@ def ingest_directory(directory_path: str, cache: Dict[str, Paper], cache_file: s
                 cache_updated = True
     
     # Final summary
-    print(f"\n[Ingest] Ingestion complete!")
-    print(f"[Ingest] 📊 Summary:")
+    print("\n[Ingest] Ingestion complete!")
+    print("[Ingest] 📊 Summary:")
     print(f"[Ingest]   • Total files found: {total_files}")
     print(f"[Ingest]   • From cache: {found_in_cache}")
     print(f"[Ingest]   • Newly parsed: {newly_ingested}")
@@ -286,7 +284,7 @@ def ingest_directory(directory_path: str, cache: Dict[str, Paper], cache_file: s
     total_size_mb = sum(os.path.getsize(p.original_path) for p in papers_to_process) / (1024 * 1024)
     
     if total_tokens > 0:
-        print(f"[Ingest] 📈 Stats:")
+        print("[Ingest] 📈 Stats:")
         print(f"[Ingest]   • Total tokens: {total_tokens:,}")
         print(f"[Ingest]   • Total size: {total_size_mb:.1f}MB")
         print(f"[Ingest]   • Avg tokens/paper: {total_tokens // len(papers_to_process):,}")

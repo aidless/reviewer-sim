@@ -7,7 +7,6 @@ sort correctly (highest first).
 """
 import os
 import sys
-import pytest
 
 # Ensure repo root is importable when running `pytest` from the repo root.
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

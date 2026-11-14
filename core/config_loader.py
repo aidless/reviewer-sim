@@ -37,7 +37,7 @@ class Config:
         if os.path.exists(run_env_path):
             print(f"[Config] Loading run-specific parameters from {run_env_path}")
             load_dotenv(run_env_path, override=True)  # Override global with run-specific
-            print(f"[Config] Environment variables after loading .env:")
+            print("[Config] Environment variables after loading .env:")
             # Debug: Print key environment variables
             key_vars = ["PROVIDER_EXTRACTION", "EXTRACTOR_MODEL", "PROVIDER_SYNTHESIS", "SYNTHESIZER_MODEL"]
             for key in key_vars:

@@ -14,11 +14,11 @@ import argparse
 import threading
 import glob
 from pathlib import Path
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, List
 from datetime import datetime
 
 from fastapi import FastAPI, HTTPException, Request, UploadFile, File
-from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from sse_starlette.sse import EventSourceResponse
 
@@ -29,7 +29,6 @@ from core.progress import (
     get_emitter, get_sse_backend, SSEBackend,
     Event, RunStarted, RunCompleted, PaperCompleted, RunProgress,
     StageStarted, StageCompleted, Error, CostUpdate,
-    configure_emitter,
 )
 
 # Import llm_wrapper early so custom models are registered with litellm
@@ -260,7 +259,7 @@ def _run_pipeline(run_dir: str, run_id: str, mode: str, config_overrides: Dict[s
             from run_review_with_dir_literature import enhance_review_with_literature
             from utilities.output_generator import save_review_markdown, save_consolidated_csv
             from utilities.helpers import load_yaml_config
-            from core.data_models import GroundedReview, LiteratureContext
+            from core.data_models import GroundedReview
 
             literature_config = load_yaml_config("config/literature_sources.yaml")
         else:
@@ -501,7 +500,6 @@ async def start_run(request: Request):
 async def event_stream(run_id: str):
     """SSE endpoint for real-time progress."""
     async def event_generator():
-        import asyncio as aio
         queue = asyncio.Queue()
         sse = get_sse_backend()
         if not sse:

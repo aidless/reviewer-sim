@@ -102,7 +102,7 @@ def find_discrepancies(run_dir: str = None):
     human_review_df.to_csv(output_path, index=False)
     
     print("--- Comparison Complete ---")
-    print(f"✅ Success! Saved discrepancy report for human review to:")
+    print("✅ Success! Saved discrepancy report for human review to:")
     print(f"{output_path}")
 
 if __name__ == "__main__":

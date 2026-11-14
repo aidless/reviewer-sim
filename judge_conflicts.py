@@ -354,7 +354,7 @@ def adjudicate_conflicts(run_dir: str = None):
     
     print("\n--- Adjudication Complete ---")
     print(f"Total judging cost for this run: ${total_cost:.4f}")
-    print(f"✅ Success! Saved Judge's verdicts to:")
+    print("✅ Success! Saved Judge's verdicts to:")
     print(output_path)
 
 

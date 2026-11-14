@@ -17,7 +17,6 @@ from pydantic import ValidationError
 
 from core.data_models import (
     Paper,
-    Extraction,
     NoveltyRankedExtraction,
     BaselineReference
 )
@@ -58,11 +57,11 @@ def _build_literature_context(baseline: BaselineReference) -> str:
         context += f"\n   - Citations: {paper.citation_count or 0}\n"
 
         if paper.key_findings:
-            context += f"   - Key Findings:\n"
+            context += "   - Key Findings:\n"
             for finding in paper.key_findings:
                 context += f"     • {finding}\n"
 
-    context += f"""
+    context += """
 
 ### Additional Instructions
 
@@ -273,7 +272,3 @@ def process_paper_extractions(
 # ============================================================================
 
 # Re-export for backward compatibility with existing code that uses agent_extractor
-from agents.agent_extractor import (
-    build_extraction_prompt,
-    process_paper_extractions as process_paper_extractions_standard
-)

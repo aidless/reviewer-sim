@@ -9,7 +9,7 @@ import threading
 import time
 import json
 from dataclasses import dataclass, field, asdict
-from typing import List, Dict, Any, Optional, Callable
+from typing import List, Dict, Any, Optional
 from abc import ABC, abstractmethod
 
 

@@ -65,7 +65,7 @@ JUDGE_TEMPERATURE=0.1
     print(f"Run directory set up at: {run_path}")
     print(f"Please place your papers in: {papers_dir}")
     print(f"You can modify LLM parameters in: {input_dir / '.env'}")
-    print(f"API keys are loaded from the global .env file at the project root")
+    print("API keys are loaded from the global .env file at the project root")
 
 def main():
     parser = argparse.ArgumentParser(description="Set up a new run directory")

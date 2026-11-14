@@ -333,9 +333,9 @@ class LiteratureSearcher:
                     return self._make_request(url, params, retry_count + 1)
                 else:
                     print(f"[Rate Limit] Max retries exceeded for URL: {url}")
-                    print(f"[Rate Limit] Consider: 1) Getting an API key from Semantic Scholar")
-                    print(f"[Rate Limit]              2) Adding delays between searches")
-                    print(f"[Rate Limit]              3) Reducing search frequency")
+                    print("[Rate Limit] Consider: 1) Getting an API key from Semantic Scholar")
+                    print("[Rate Limit]              2) Adding delays between searches")
+                    print("[Rate Limit]              3) Reducing search frequency")
                     return None
 
             print(f"HTTP error: {e}")

@@ -4,7 +4,6 @@ from typing import Dict, Any, Optional, List
 import sys
 import os
 import requests  # <-- NEW IMPORT
-import json      # <-- NEW IMPORT
 
 # --- THIS WILL PRINT ONCE WHEN THE SCRIPT LOADS ---
 #print("\n" + "="*60)
@@ -172,7 +171,7 @@ def _call_custom_ollama_bypass(
     # Add JSON mode if requested
     if response_format == "json":
         payload["response_format"] = {"type": "json_object"}
-        print(f"[LLM_Wrapper_V8_BYPASS] Enabling JSON mode")
+        print("[LLM_Wrapper_V8_BYPASS] Enabling JSON mode")
     
     print(f"[LLM_Wrapper_V8_BYPASS] Payload keys: {list(payload.keys())}")
 
@@ -285,7 +284,7 @@ def call_llm(
         # DeepSeek and others may not support JSON mode explicitly
         # They rely on prompt engineering instead
         elif provider_lower == "deepseek":
-            print(f"[LLM] DeepSeek JSON mode via prompt engineering (no native JSON mode)")
+            print("[LLM] DeepSeek JSON mode via prompt engineering (no native JSON mode)")
         else:
             print(f"[LLM] JSON mode requested but {provider} support unknown, using prompt only")
 

@@ -4,8 +4,6 @@ import sys
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import argparse
-import threading
-import queue
 
 import logging
 
@@ -73,12 +71,12 @@ def main():
         sys.exit(1)
     
     print("=" * 80)
-    print(f"🚀 Starting Batch Review Process")
+    print("🚀 Starting Batch Review Process")
     print(f"📁 Found {len(run_dirs)} directories to process: {', '.join(run_dirs)}")
     if args.parallel:
         print(f"⚡ Running in parallel with {args.max_workers} workers")
     else:
-        print(f"🔄 Running sequentially")
+        print("🔄 Running sequentially")
     print("=" * 80)
     
     successful_runs = 0

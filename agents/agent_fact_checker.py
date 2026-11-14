@@ -10,14 +10,12 @@ Triggered when the Reader identifies claims that warrant verification:
 - Missing citations for well-known results
 """
 
-import json
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 
 from core.data_models import (
     NoveltyRankedExtraction,
-    FactCheckResult,
-    RelatedPaperMetadata
+    FactCheckResult
 )
 from core.config_loader import Config
 from core.llm_wrapper import call_llm
@@ -356,7 +354,7 @@ def summarize_fact_checks(fact_checks: List[FactCheckResult]) -> str:
         summary += f"### ✓ Verified Novel Claims ({len(confirmed)})\n\n"
         for fc in confirmed:
             summary += f"**{fc.criterion_id}**: {fc.claim[:100]}...\n"
-            summary += f"- No contradictory prior work found\n\n"
+            summary += "- No contradictory prior work found\n\n"
 
     if novel:
         summary += f"### 🔍 Pending Verification ({len(novel)})\n\n"

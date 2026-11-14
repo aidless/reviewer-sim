@@ -62,7 +62,6 @@ class TestConfigHash:
         assert h1 == h2
 
     def test_hash_changes_with_criteria(self):
-        import types
         h1 = get_config_hash(_stub_config())
         c2 = _stub_config()
         c2.criteria_config = {"criteria": [{"id": "x", "weight": 99}]}

@@ -57,7 +57,6 @@ def get_config_hash(config: 'Config') -> str:
     
     # Include prompt templates in hash
     prompt_files = {}
-    import glob as glob_mod
     prompts_dir = os.path.join(config.config_path, "prompts")
     if os.path.isdir(prompts_dir):
         for pfile in sorted(os.listdir(prompts_dir)):
