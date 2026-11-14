@@ -1,0 +1,129 @@
+{
+ "total": 20,
+ "passed": 20,
+ "failed": 0,
+ "selftest": false,
+ "failed_by_axis": {},
+ "results": [
+  {
+   "id": "CFG-01",
+   "axis": "config/criteria",
+   "ok": true,
+   "detail": "100"
+  },
+  {
+   "id": "CFG-02",
+   "axis": "config/criteria",
+   "ok": true,
+   "detail": "development_economics"
+  },
+  {
+   "id": "CFG-03",
+   "axis": "config/criteria",
+   "ok": true,
+   "detail": "raised FileNotFoundError"
+  },
+  {
+   "id": "SYN-01",
+   "axis": "synthesizer/scoring",
+   "ok": true,
+   "detail": "80.00000000000001"
+  },
+  {
+   "id": "SYN-02",
+   "axis": "synthesizer/scoring",
+   "ok": true,
+   "detail": "Accept"
+  },
+  {
+   "id": "SYN-03",
+   "axis": "synthesizer/scoring",
+   "ok": true,
+   "detail": "14.4"
+  },
+  {
+   "id": "THR-01",
+   "axis": "synthesizer/thresholds",
+   "ok": true,
+   "detail": "直接接收|修改后接收|大修后重投|拒稿"
+  },
+  {
+   "id": "THR-02",
+   "axis": "synthesizer/thresholds",
+   "ok": true,
+   "detail": "大修后重投"
+  },
+  {
+   "id": "HL-01",
+   "axis": "helpers/normalize",
+   "ok": true,
+   "detail": "openai_gpt-4o"
+  },
+  {
+   "id": "HL-02",
+   "axis": "helpers/normalize",
+   "ok": true,
+   "detail": "a_b_cd"
+  },
+  {
+   "id": "NV-01",
+   "axis": "helpers/novelty",
+   "ok": true,
+   "detail": "97.2"
+  },
+  {
+   "id": "NV-02",
+   "axis": "helpers/novelty",
+   "ok": true,
+   "detail": "100"
+  },
+  {
+   "id": "HSH-01",
+   "axis": "config/hash",
+   "ok": true,
+   "detail": "True"
+  },
+  {
+   "id": "HSH-02",
+   "axis": "config/hash",
+   "ok": true,
+   "detail": "True"
+  },
+  {
+   "id": "LLM-01",
+   "axis": "llm/token-budget",
+   "ok": true,
+   "detail": "1234"
+  },
+  {
+   "id": "LLM-02",
+   "axis": "llm/prompt-cache",
+   "ok": true,
+   "detail": "ephemeral"
+  },
+  {
+   "id": "ING-01",
+   "axis": "ingestor/metadata",
+   "ok": true,
+   "detail": "My Paper Title"
+  },
+  {
+   "id": "ING-02",
+   "axis": "ingestor/hash",
+   "ok": true,
+   "detail": "True"
+  },
+  {
+   "id": "PRG-01",
+   "axis": "progress/events",
+   "ok": true,
+   "detail": "paper_completed"
+  },
+  {
+   "id": "DM-01",
+   "axis": "data_models/validation",
+   "ok": true,
+   "detail": "raised ValidationError"
+  }
+ ]
+}

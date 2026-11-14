@@ -448,3 +448,31 @@ Prove" above.
 | `config/` | criteria / prompts / literature_sources / 模型成本模板 |
 | `my_first_review/` | 仓库内真实跑通的完整示例（12 份评审 + 3 份汇总 CSV） |
 | `docs/` | CLI demo GIF + dashboard 截图 |
+
+## 验收题库与复算
+
+`eval/cases.jsonl` 是 20 条可执行验收题，覆盖十二个口径：配置与权重
+（`config/criteria`）、加权计分与推荐映射（`synthesizer/scoring`、
+`synthesizer/thresholds`）、文件名清洗与新颖度调整（`helpers/normalize`、
+`helpers/novelty`）、配置哈希（`config/hash`）、token 预算与 prompt 前缀缓存
+（`llm/token-budget`、`llm/prompt-cache`）、入库元数据与文件哈希
+（`ingestor/metadata`、`ingestor/hash`）、进度事件（`progress/events`）与
+数据模型校验（`data_models/validation`）。20 条全部是 `expr` / `raises`，
+期望值不是抄文档，而是**调用本仓库模块现算**：
+
+```bash
+python3 eval/run_cases.py            # 20/20 cases passed
+python3 eval/run_cases.py --save     # 顺带把结果写进 eval/run-report.json
+python3 eval/run_cases.py --selftest # 篡改第一条期望值，必须变红（19/20）
+```
+
+**数字如何复算**：`eval/run-report.json` 里每条 case 都带 `id` / `axis` /
+`detail`，把 `detail` 与 `cases.jsonl` 的 `verify` 代码一起看，就能从源码
+复现该数字（例如 `SYN-01` 的 80.0 来自 `calculate_recommendation` 对
+`Σ(score/5×weight)/Σweight×100` 的计算）；`--save` 重跑一次即可重建整份
+报告，不需要手工抄数。`expr` 题按 int/float 容差 1e-9 比较，`raises` 题
+断言异常类名（`FileNotFoundError`、`ValidationError`）。
+
+**失败归因**：`run_cases.py` 不只报通过率，失败时按 `axis` 汇总（例如
+`config/criteria: 1 条 —— CFG-01`），直接指出是哪个模块的哪个口径坏了；
+`--selftest` 必须打印 `19/20` 且归因到被篡改的那条，否则这套题是装饰。
