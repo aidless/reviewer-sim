@@ -1,14 +1,15 @@
 {
   "name": "paperreview",
   "version": "1.0.0",
-  "description": "",
+  "description": "Unused npm scaffold. The review tool is Python and is not published from this file. License follows LICENSE.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
+  "private": true,
   "type": "commonjs",
   "devDependencies": {
     "autoprefixer": "^10.4.21",

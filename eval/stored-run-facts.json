@@ -1,0 +1,108 @@
+{
+  "cache_absolute_original_paths": 1,
+  "cache_entries": 2,
+  "cache_filenames": [
+    "main.pdf",
+    "main_1.pdf"
+  ],
+  "cache_paths_mentioning_agentic_paper_review": 1,
+  "cited_main_13_10_overall": "43.2",
+  "cited_main_1_13_12_cost_2dp": "0.22",
+  "cited_main_1_13_12_cost_4dp": "0.2223",
+  "cited_main_1_13_12_cost_usd": "0.22231965599999998",
+  "cited_main_1_13_12_overall": "30.4",
+  "clock_plus_8h_files": [
+    "main_1_deepseek_deepseek-v4-pro_deepseek_deepseek-v4-pro_20260628_203726.md",
+    "main_1_deepseek_deepseek-v4-pro_deepseek_deepseek-v4-pro_20260628_210006.md",
+    "main_2_deepseek_deepseek-v4-pro_deepseek_deepseek-v4-pro_20260628_210451.md",
+    "main_deepseek_deepseek-v4-pro_deepseek_deepseek-v4-pro_20260628_205517.md"
+  ],
+  "cross_model_pairs": 0,
+  "csv_byte_identical_groups": [
+    [
+      "consolidated_reviews_20260628_211215.csv",
+      "consolidated_reviews_20260628_211226.csv"
+    ]
+  ],
+  "csv_distinct_sha256": 5,
+  "csv_files": 6,
+  "csv_rows": 15,
+  "csv_rows_duplicate_overall_agrees": 15,
+  "csv_rows_match_paired_review": 15,
+  "csv_rows_score_match": 15,
+  "csv_rows_with_duplicate_overall_column": 15,
+  "extra_pdfs_in_papers_dir": [
+    "PAPER5_main.pdf"
+  ],
+  "filename_clock_plus_8h": 4,
+  "formula": "calculate_recommendation: sum((score/label_count)*weight) / sum(all criterion weights) * 100; a criterion absent from the review contributes 0 and its weight stays in the denominator",
+  "headline": "scores 12/12; recs 12/12; present_denom_differ 8; outside_scale 5; clock_plus_8h 4; csv_files 6; csv_hashes 5; csv_rows 15; csv_rows_match 15; unpaired_reviews 0; unpaired_csv_rows 0; models 1; cross_model_pairs 0",
+  "ml_criteria": 8,
+  "ml_thresholds": [
+    85,
+    65,
+    45,
+    0
+  ],
+  "ml_weight_sum": 100,
+  "model_count": 1,
+  "model_ids": [
+    "deepseek/deepseek-v4-pro"
+  ],
+  "paper_spans": {
+    "main.pdf": {
+      "max": "43.2",
+      "min": "31.4",
+      "n": 4
+    },
+    "main_1.pdf": {
+      "max": "48.6",
+      "min": "30.4",
+      "n": 4
+    },
+    "main_2.pdf": {
+      "max": "52.0",
+      "min": "38.6",
+      "n": 3
+    },
+    "paper.pdf": {
+      "max": "37.6",
+      "min": "37.6",
+      "n": 1
+    }
+  },
+  "paper_stems_in_reviews": 4,
+  "pdfs_in_run_dir": [
+    "main.pdf"
+  ],
+  "pdfs_referenced_missing_from_run_dir": [
+    "main_1.pdf",
+    "main_2.pdf",
+    "paper.pdf"
+  ],
+  "progress_matches_latest_review": 2,
+  "progress_papers": [
+    "main.pdf",
+    "main_1.pdf"
+  ],
+  "recommendation_match_reviews": 12,
+  "review_files": 12,
+  "reviews_missing_a_criterion": 8,
+  "reviews_present_denominator_differs": 8,
+  "reviews_score_outside_scale": 5,
+  "reviews_weight_mismatch": 0,
+  "run_minutes_are": [
+    "2026-06-28"
+  ],
+  "scale_max": 5,
+  "scale_min": 1,
+  "score_match_reviews": 12,
+  "score_mismatches": [],
+  "unique_cost_conflicts": [],
+  "unique_cost_max_usd": "0.52020303",
+  "unique_cost_min_usd": "0.20203445999999997",
+  "unique_cost_sum_usd": "3.83812957599999959",
+  "unique_paper_minutes": 12,
+  "unpaired_csv_rows": 0,
+  "unpaired_reviews": 0
+}
