@@ -1,11 +1,9 @@
 # CI for reviewer-sim
 #
-# Scope note, verified against the tree on 2026-11-01: a real offline test suite
-# now lives in tests/ (38 tests, no API keys / no network needed). It covers
-# config loading (weights sum to 100, threshold sorting), helpers (sanitize,
-# hashing, novelty adjustment), and the score -> recommendation mapping.
-# The 20 modules under core/ and agents/ are still compiled and imported to
-# catch syntax/import regressions. LLM calls are NOT executed in CI.
+# `make check` is the offline gate: pytest, eval/run_cases.py (including the
+# stored-run recompute), a self-test that must go red, and a README drift
+# check. No API key and no LLM call. The import step still compiles core/ and
+# agents/ so a syntax or import break fails before the numeric check.
 name: CI
 
 on:
@@ -54,8 +52,8 @@ jobs:
               sys.exit("import failures:\n  " + "\n  ".join(bad))
           PY
 
-      - name: Run the offline test suite
-        run: python -m pytest tests/ -o addopts="" -q
+      - name: Offline check (pytest, eval cases, README drift)
+        run: make check
 
   mutation-control:
     # Proves the syntax gate can fail.

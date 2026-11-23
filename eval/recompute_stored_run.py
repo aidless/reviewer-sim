@@ -517,6 +517,9 @@ def recompute(root: Path | None = None) -> dict:
         "dev_thresholds": _thresholds(dev),
         "float_abs_tol": _float_tol(root),
         "prompt_files": len(list((root / "config" / "prompts").glob("*.txt"))),
+        "npm_scaffold_version": json.loads((root / "package.json").read_text(encoding="utf-8"))[
+            "version"
+        ],
     }
     return {"stored": stored, "repo": repo}
 
@@ -657,7 +660,15 @@ def main(argv: list[str] | None = None) -> int:
         if not check_all(tampered, REPO_ROOT):
             print("SELFTEST failed: tampered score count was accepted", file=sys.stderr)
             return 1
-        print("SELFTEST ok: tampered score count was rejected")
+        doctored = README_PATH.read_text(encoding="utf-8").replace(
+            f'"score_match_reviews": {payload["stored"]["score_match_reviews"]}',
+            f'"score_match_reviews": {payload["stored"]["score_match_reviews"] + 1}',
+            1,
+        )
+        if not check_document(doctored, payload, REPO_ROOT, "README.md"):
+            print("SELFTEST failed: doctored README number was accepted", file=sys.stderr)
+            return 1
+        print("SELFTEST ok: tampered score count and doctored README were rejected")
         return 0
     if args.check:
         errors = check_all(payload, REPO_ROOT)
